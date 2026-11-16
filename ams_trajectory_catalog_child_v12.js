@@ -3,7 +3,7 @@
     const $ = id => document.getElementById(id);
     const ui = {
         formulaUnits: $("formulaUnits"),
-        waterCount: $("waterCount"), autoPlay: $("autoPlay"), reload: $("reload"),
+        waterCount: $("waterCount"), reload: $("reload"),
         play: $("play"), first: $("first"), center: $("center"), speed: $("speed"),
         hydration: $("hydration"), bonds: $("bonds"), status: $("status"),
         canvas: $("canvas"), timeline: $("timeline"), frameLabel: $("frameLabel"),
@@ -220,7 +220,6 @@
         updateMetadata(); ui.timeline.max = data.frames.length - 1;
         for (const control of [ui.play, ui.first, ui.center]) control.disabled = false; ui.timeline.disabled = false;
         message(`${sourceName} を読み込みました。再生可能です。`); draw();
-        if (ui.autoPlay.checked) { state.playing = false; togglePlayback(); }
     }
     async function loadFile(file) {
         message(`${file.name} を読み込み中です。`);
