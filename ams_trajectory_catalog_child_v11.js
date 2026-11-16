@@ -2,7 +2,7 @@
 (() => {
     const $ = id => document.getElementById(id);
     const ui = {
-        folder: $("folder"), manualFile: $("manualFile"), formulaUnits: $("formulaUnits"),
+        formulaUnits: $("formulaUnits"),
         waterCount: $("waterCount"), autoPlay: $("autoPlay"), reload: $("reload"),
         play: $("play"), first: $("first"), center: $("center"), speed: $("speed"),
         hydration: $("hydration"), bonds: $("bonds"), status: $("status"),
@@ -43,7 +43,7 @@
     const state = {
         data: null, sourceName: "", frame: 0, playing: false, lastTimestamp: 0,
         accumulator: 0, zoom: 1, panX: 0, panY: 0, dragging: false, lastX: 0, lastY: 0,
-        filesByName: new Map(), waterByAtomId: new Map(), atomIndexById: new Map(), ionIndices: []
+        waterByAtomId: new Map(), atomIndexById: new Map(), ionIndices: []
     };
     const finite = Number.isFinite;
     const escapeHtml = value => String(value ?? "-").replace(/[&<>"']/g, c => ({
@@ -228,18 +228,32 @@
     }
     async function loadSelectedTrajectory() {
         const filename = expectedFileName();
-        if (!filename) return message("未対応の条件です。", true);
-        state.playing = false; ui.play.textContent = "再生";
+        if (!filename) {
+            message("この条件のデータはありません。", true);
+            return;
+        }
+
+        state.playing = false;
+        ui.play.textContent = "再生";
+        ui.reload.disabled = true;
+        ui.formulaUnits.disabled = true;
+        ui.waterCount.disabled = true;
+
         try {
-            const localFile = state.filesByName.get(filename);
-            if (localFile) return await loadFile(localFile);
-            message(`${filename} を自動取得中です。`);
-            const response = await fetch(encodeURI(filename), { cache: "no-store" });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            message(`データを読み込んでいます…\n${filename}`);
+            const response = await fetch(encodeURI(filename), { cache: "force-cache" });
+            if (!response.ok) {
+                throw new Error(`データ取得エラー（HTTP ${response.status}）`);
+            }
             initializeLoadedData(await response.json(), filename);
         } catch (error) {
-            state.data = null; draw();
-            message(`${filename} を自動取得できません。JSONフォルダを一度選択してください。詳細: ${error.message}`, true);
+            state.data = null;
+            draw();
+            message(`データを読み込めませんでした。先生に知らせてください。\n${error.message}`, true);
+        } finally {
+            ui.reload.disabled = false;
+            ui.formulaUnits.disabled = false;
+            ui.waterCount.disabled = false;
         }
     }
     function animate(timestamp) {
@@ -257,15 +271,6 @@
         state.playing = !state.playing; ui.play.textContent = state.playing ? "一時停止" : "再生"; state.lastTimestamp = 0;
         if (state.playing) { if (state.frame >= state.data.frames.length - 1) state.frame = 0; requestAnimationFrame(animate); }
     }
-    ui.folder.addEventListener("change", async () => {
-        state.filesByName = new Map([...ui.folder.files].map(file => [file.name, file]));
-        const missing = Object.values(FILE_MAP).filter(name => !state.filesByName.has(name));
-        message(missing.length ? `JSONフォルダを読み込みました。未検出: ${missing.length}ファイル` : "18条件のJSONを確認しました。条件変更時に自動読込します。", missing.length > 0);
-        await loadSelectedTrajectory();
-    });
-    ui.manualFile.addEventListener("change", async () => { if (ui.manualFile.files[0]) { try { await loadFile(ui.manualFile.files[0]); } catch (error) { message(`読込失敗: ${error.message}`, true); } } });
-    ui.formulaUnits.addEventListener("change", loadSelectedTrajectory);
-    ui.waterCount.addEventListener("change", loadSelectedTrajectory);
     ui.reload.addEventListener("click", loadSelectedTrajectory);
     ui.play.addEventListener("click", togglePlayback);
     ui.first.addEventListener("click", () => { state.playing = false; state.frame = 0; ui.play.textContent = "再生"; draw(); });

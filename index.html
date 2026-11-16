@@ -3,41 +3,57 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AMS条件選択式軌道再生 v10</title>
+<title>水のつぶの動きを見てみよう</title>
 <style>
-:root{--bg:#eef3f8;--panel:#fff;--text:#172033;--muted:#59677d;--line:#cbd5e1;--accent:#1769aa;--danger:#b42318}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1380px;margin:auto;padding:16px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.toolbar{display:flex;flex-wrap:wrap;gap:9px;align-items:end;margin-bottom:12px}.condition{border:2px solid #76a8cc;background:#f8fcff}.grid{display:grid;grid-template-columns:minmax(320px,1fr) 330px;gap:16px}@media(max-width:860px){.grid{grid-template-columns:1fr}}label{display:grid;gap:4px;font-size:.86rem;color:var(--muted)}input,select,button{font:inherit;border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff;color:var(--text)}button{cursor:pointer}button:disabled{opacity:.45}button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}.canvas-wrap{width:100%;aspect-ratio:16/9;background:#fff;border:1px solid #c8d1dc;border-radius:10px;overflow:hidden}canvas{display:block;width:100%;height:100%;touch-action:none}.row{display:flex;gap:8px;align-items:center}.row input{width:100%}.status{margin:8px 0;color:var(--muted);white-space:pre-wrap}.error{color:var(--danger)}dl{display:grid;grid-template-columns:1fr auto;gap:7px 12px;font-size:.9rem}dt{color:var(--muted)}dd{margin:0;text-align:right}.note{font-size:.84rem;color:var(--muted);line-height:1.55}h1{font-size:1.25rem;margin:0 0 12px}h2{font-size:1rem;margin:15px 0 7px}
+:root{--bg:#eef6fb;--panel:#fff;--text:#17324a;--muted:#5b7183;--line:#c8d9e5;--accent:#0878bd;--accent2:#eaf7ff;--danger:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Yu Gothic UI","Meiryo",sans-serif}main{max-width:1380px;margin:auto;padding:14px}h1{font-size:clamp(1.3rem,3vw,2rem);margin:4px 0 14px;text-align:center}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 2px 8px rgba(23,50,74,.06)}.condition{border:3px solid #78bce5;background:linear-gradient(180deg,#fff,#f5fbff);margin-bottom:12px}.condition-grid{display:grid;grid-template-columns:repeat(2,minmax(180px,1fr)) auto;gap:12px;align-items:end}@media(max-width:760px){.condition-grid{grid-template-columns:1fr}}label{display:grid;gap:6px;font-weight:700}select,button,input{font:inherit;border:2px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;color:var(--text);min-height:46px}select{font-size:1.05rem}button{cursor:pointer;font-weight:800}button:disabled{opacity:.48;cursor:not-allowed}.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-size:1.05rem}.controls{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin-bottom:12px}.controls button{min-width:100px}.status{margin:10px 0;padding:12px 14px;border-radius:12px;background:var(--accent2);font-weight:700;white-space:pre-wrap}.status.error{background:#fdeaea;color:var(--danger)}.grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:14px}@media(max-width:900px){.grid{grid-template-columns:1fr}}.canvas-wrap{width:100%;aspect-ratio:16/9;background:#fff;border:2px solid #1f2937;border-radius:12px;overflow:hidden}canvas{display:block;width:100%;height:100%;touch-action:none}.timeline-row{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;margin-top:10px}.timeline-row input{width:100%;padding:0;min-height:32px}details{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}summary{cursor:pointer;font-weight:800}dl{display:grid;grid-template-columns:1fr auto;gap:7px 10px;font-size:.9rem}dt{color:var(--muted)}dd{margin:0;text-align:right}.note{font-size:.88rem;color:var(--muted);line-height:1.6}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:#dff2ff;color:#075f93;font-size:.82rem;font-weight:800}
 </style>
 </head>
 <body>
 <main>
-<h1>AMS 条件選択式JSON軌道再生プレイヤー v10</h1>
-<section class="panel toolbar condition" aria-label="事前計算条件">
-<label>NaCl式単位数
-<select id="formulaUnits"><option>1</option><option>2</option><option>3</option><option>4</option><option>6</option><option>8</option></select>
+<h1>水のつぶの動きを見てみよう</h1>
+<section class="panel condition" aria-label="条件を選ぶ">
+<div class="condition-grid">
+<label>① 食塩の結晶の大きさ
+<select id="formulaUnits">
+<option value="1">1式単位</option><option value="2">2式単位</option><option value="3">3式単位</option><option value="4">4式単位</option><option value="6">6式単位</option><option value="8">8式単位</option>
+</select>
 </label>
-<label>水分子数・三層内訳
-<select id="waterCount"><option value="36">36（12-12-12）</option><option value="64">64（25-25-14）</option><option value="100">100（34-34-32）</option></select>
+<label>② 水分子の数
+<select id="waterCount">
+<option value="36">36分子</option><option value="64">64分子</option><option value="100">100分子</option>
+</select>
 </label>
-<label>JSONフォルダを選択（一度だけ）
-<input id="folder" type="file" webkitdirectory directory multiple accept=".json,application/json">
-</label>
-<button id="reload" type="button">選択条件を読み込む</button>
-<label><span>自動再生</span><span><input id="autoPlay" type="checkbox"> 読込後に開始</span></label>
-<details><summary>手動ファイル読込</summary><input id="manualFile" type="file" accept=".json,application/json"></details>
+<button id="reload" class="primary" type="button">③ この条件を見る</button>
+</div>
 </section>
-<section class="panel toolbar">
-<button id="play" class="primary" disabled>再生</button><button id="first" disabled>先頭へ</button><button id="center" disabled>表示を初期位置へ</button>
-<label>速度<select id="speed"><option value=".25">0.25倍</option><option value=".5">0.5倍</option><option value="1" selected>1倍</option><option value="2">2倍</option><option value="4">4倍</option></select></label>
-<label><span>水和水</span><span><input id="hydration" type="checkbox" checked> 青色・補助線</span></label>
-<label><span>結合線</span><span><input id="bonds" type="checkbox" checked> 表示</span></label>
+<section class="panel controls" aria-label="再生操作">
+<button id="play" class="primary" type="button" disabled>再生</button>
+<button id="first" type="button" disabled>最初にもどる</button>
+<button id="center" type="button" disabled>表示をもどす</button>
+<span class="badge">画面をドラッグ、ホイールで拡大</span>
+<details>
+<summary>表示の設定</summary>
+<div class="controls">
+<label>速さ<select id="speed"><option value=".25">ゆっくり</option><option value=".5">0.5倍</option><option value="1" selected>ふつう</option><option value="2">2倍</option><option value="4">4倍</option></select></label>
+<label><span><input id="hydration" type="checkbox" checked> 水和水を青くする</span></label>
+<label><span><input id="bonds" type="checkbox" checked> 水分子の線を表示</span></label>
+</div>
+</details>
 </section>
-<div id="status" class="status" aria-live="polite">条件に対応するJSONを確認中です。</div>
+<div id="status" class="status" role="status" aria-live="polite">データを読み込んでいます…</div>
 <div class="grid">
-<section class="panel"><div class="canvas-wrap"><canvas id="canvas"></canvas></div><div class="row"><span id="frameLabel">0 / 0</span><input id="timeline" type="range" min="0" max="0" value="0" disabled></div></section>
-<aside class="panel"><h2>計算条件</h2><dl id="meta"><dt>状態</dt><dd>未読込</dd></dl><h2>現在フレーム</h2><dl id="metrics"><dt>step</dt><dd>-</dd></dl><h2>使用方法</h2><p class="note">18個のJSONをこのHTMLと同じフォルダに置き、HTMLをWebサーバー経由で開くと条件変更だけで自動読込します。HTMLを直接開く場合は「JSONフォルダを選択」でフォルダを一度指定してください。その後は条件変更だけで自動的に対応データを読み込みます。</p><h2>注意</h2><p id="warning" class="note">データ読込後に表示します。</p></aside>
+<section class="panel">
+<div class="canvas-wrap"><canvas id="canvas"></canvas></div>
+<div class="timeline-row"><strong id="frameLabel">0 / 0</strong><input id="timeline" type="range" min="0" max="0" value="0" disabled aria-label="再生位置"></div>
+</section>
+<aside class="panel">
+<h2>選んだ条件</h2><dl id="meta"><dt>状態</dt><dd>読込中</dd></dl>
+<h2>いまのようす</h2><dl id="metrics"><dt>step</dt><dd>-</dd></dl>
+<p id="warning" class="note">データ読込後に表示します。</p>
+</aside>
 </div>
 </main>
-<script src="ams_trajectory_catalog_v10.js"></script>
+<script src="ams_trajectory_catalog_child_v11.js"></script>
 </body>
 </html>
