@@ -7,6 +7,7 @@
         play: $("play"), first: $("first"), center: $("center"), speed: $("speed"),
         hydration: $("hydration"), bonds: $("bonds"), status: $("status"),
         canvas: $("canvas"), timeline: $("timeline"), frameLabel: $("frameLabel"),
+        mdElapsedTime: $("mdElapsedTime"),
         meta: $("meta"), metrics: $("metrics"), warning: $("warning")
     };
     const ctx = ui.canvas.getContext("2d");
@@ -185,9 +186,42 @@
         ctx.save(); ctx.strokeStyle = DISPLAY.boxBorderColor; ctx.lineWidth = Math.max(1, ratio); ctx.strokeRect(cellLeft, cellTop, cellWidth, cellHeight); ctx.restore();
         updateMetrics(p.frame);
     }
+    function formatMdElapsedTime(timeSecond) {
+        if (!finite(timeSecond) || timeSecond < 0) {
+            return "MD経過時間：-";
+        }
+
+        const timePicosecond = timeSecond * 1.0e12;
+
+        if (timePicosecond < 1000) {
+            return `MD経過時間：${timePicosecond.toFixed(3)} ps`;
+        }
+
+        const timeNanosecond = timeSecond * 1.0e9;
+        return `MD経過時間：${timeNanosecond.toFixed(3)} ns`;
+    }
+
     function updateMetrics(frame) {
-        const index = Math.floor(state.frame), diagnostic = frame.diagnostics ?? {};
-        ui.frameLabel.textContent = `${index + 1} / ${state.data.frames.length}`; ui.timeline.value = index;
+        const index = Math.floor(state.frame);
+        const nextIndex = Math.min(index + 1, state.data.frames.length - 1);
+        const interpolationRatio = state.frame - index;
+        const currentFrame = state.data.frames[index];
+        const nextFrame = state.data.frames[nextIndex];
+        const interpolatedTimeSecond =
+            currentFrame.time_s
+            +
+            (
+                nextFrame.time_s
+                -
+                currentFrame.time_s
+            )
+            *
+            interpolationRatio;
+        const diagnostic = frame.diagnostics ?? {};
+
+        ui.frameLabel.textContent = `${index + 1} / ${state.data.frames.length}`;
+        ui.timeline.value = index;
+        ui.mdElapsedTime.textContent = formatMdElapsedTime(interpolatedTimeSecond);
         ui.metrics.innerHTML = [
             ["step", frame.step], ["時間", finite(frame.time_s) ? `${(frame.time_s * 1e12).toFixed(3)} ps` : "-"],
             ["温度", finite(frame.instantaneousTemperature_K) ? `${frame.instantaneousTemperature_K.toFixed(2)} K` : "-"],
